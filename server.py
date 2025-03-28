@@ -1,12 +1,19 @@
 from flask import Flask, jsonify
-from cryptography.fernet import Fernet
+from flask_talisman import Talisman
+import os
 
 app = Flask(__name__)
+Talisman(app)  # Fuerza HTTPS
+
+# Cargar la clave AES desde una variable de entorno
+AES_KEY = os.getenv("AES_KEY")
+
+if not AES_KEY:
+    raise ValueError("Falta la clave AES en las variables de entorno")
 
 @app.route("/get-key", methods=["GET"])
 def get_key():
-    aes_key = Fernet.generate_key()  # Genera una clave AES (256 bits)
-    return jsonify({"aes_key": aes_key.decode()}), 200
+    return jsonify({"aes_key": AES_KEY}), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
